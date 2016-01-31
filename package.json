@@ -1,0 +1,19 @@
+{
+  "name": "salyne",
+  "version": "1.0.0",
+  "description": "light weight dependency injection library",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/from-nibly/salyne"
+  },
+  "author": "from-nibly",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "3.5.0",
+    "mocha": "2.4.5"
+  }
+}
