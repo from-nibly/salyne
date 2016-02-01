@@ -19,5 +19,5 @@ injector.bind('bang', function() {
 var foo1 = injector.create('foo');
 var foo2 = injector.create('foo');
 
-console.log(foo1.bar.bar, '=', foo2.bar.bar);
-console.log(foo1.bang.bang, '!=', foo2.bang.bang);
+console.log(foo1.bar.bar + '=' + foo2.bar.bar);
+console.log(foo1.bang.bang + '!=' + foo2.bang.bang);
