@@ -1,6 +1,7 @@
 {
   "name": "salyne",
   "version": "1.0.2",
+  "engine" : "node >= 5.0.0",
   "description": "light weight dependency injection library",
   "main": "index.js",
   "scripts": {
