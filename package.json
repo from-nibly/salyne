@@ -1,6 +1,6 @@
 {
   "name": "salyne",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "engines": {
     "node": ">= 5.0.0"
   },
