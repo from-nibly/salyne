@@ -2,19 +2,19 @@ var fs = require('fs'),
   path = require('path');
 exports = module.exports = function Salyne() {
   var registry = {};
+  var parent = module;
+  while(parent.parent) {
+    parent = parent.parent;
+  }
 
   this.create = function(name, dir) {
     dir = dir || [];
     var entry = registry[name];
     if(!entry) {
       try {
-        return require(path.join(process.cwd(), 'node_modules', name));
+        return parent.require(name);
       } catch(e) {
-        try {
-          return require(name);
-        } catch(e) {
-          throw new Error(`could not find dependency ${name}`);
-        }
+        throw new Error(`could not find dependency ${name}`);
       }
     } else if(entry.options.singleton === true && entry.instance) {
       return entry.instance;
@@ -95,7 +95,7 @@ exports = module.exports = function Salyne() {
     for (var arg of args) {
       if(typeof arg === 'string') {
         if(arg.endsWith('.js') || arg.endsWith('.json') || arg.indexOf('/') !== -1 || arg.indexOf('\\') !== -1) {
-          fileName = arg;
+          fileName = path.join(path.dirname(parent.filename), arg);
         } else {
           name = arg;
         }
@@ -107,7 +107,7 @@ exports = module.exports = function Salyne() {
     var fileNames = [];
     if(!fileName.endsWith('.js') && !fileName.endsWith('.json')) {
       for(var file of fs.readdirSync(fileName)) {
-        fileNames.push('./' + path.join(fileName, file));
+        fileNames.push(path.join(fileName, file));
       }
     } else {
       fileNames.push(fileName);
@@ -117,7 +117,7 @@ exports = module.exports = function Salyne() {
       if(!file.endsWith('.js') && !file.endsWith('.json')) {
         continue;
       }
-      var ctor = require(path.join(process.cwd(), file));
+      var ctor = parent.require(file);
       var nameReg = /\/?([\w\.]*)(.js|.json)/gmi
       if(fileNames.length === 1) {
         name = name || ctor.name || nameReg.exec(file)[1];
