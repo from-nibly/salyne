@@ -1,4 +1,6 @@
 # salyne
+
+[![Join the chat at https://gitter.im/from-nibly/salyne](https://badges.gitter.im/from-nibly/salyne.svg)](https://gitter.im/from-nibly/salyne?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://drone.io/github.com/from-nibly/salyne/status.png)](https://drone.io/github.com/from-nibly/salyne/latest)
 
 Salyne (saline) is a dependency injection library that is largely compatible with electrolyte but is lighter, simpler, and more flexible.
