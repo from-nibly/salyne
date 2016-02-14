@@ -14,11 +14,13 @@ exports = module.exports = function Salyne(options) {
     while (parent.parent) {
       parent = parent.parent;
     }
-
   }
 
-  this.create = function(name, dir) {
-    dir = dir || [];
+  this.create = function(name) {
+    return create(name, []);
+  };
+
+  var create = (name, dir) => {
     var entry = registry[name];
     if (!entry) {
       try {
@@ -30,17 +32,50 @@ exports = module.exports = function Salyne(options) {
       return entry.instance;
     } else {
       var instance;
-      var args = [];
+      var deps = [];
       for (var req of entry.requires) {
+        //create a copy of our dependency path
         var newDir = dir.slice();
         newDir.push(req);
+        //check for circular dependency
         if (newDir.indexOf(req) !== newDir.length - 1) {
           throw new Error(`circular dependency detected: ${newDir.toString()}`);
         }
-        args.push(this.create(req, newDir));
+        //push the arg
+        deps.push(create(req, newDir));
       }
-      entry.instance = new entry.ctor(...args);
+      entry.instance = new entry.ctor(...deps);
       return entry.instance;
+    }
+  };
+
+  this.factory = function() {
+    exclusions = Object.keys(arguments)
+      .map(x => arguments[x]);
+    var name = exclusions.splice(0, 1);
+    var entry = registry[name];
+    if(!entry) {
+      throw new Error(`could not find dependency ${name} for factory creation`);
+    } else if (entry.options.singleton === true) {
+      throw new Error("can't create factory for a singleton");
+    } else {
+      return (depObj) => {
+        var deps = [];
+        for (var req of entry.requires) {
+          //if you have excluded the requirement from the factory
+          if(exclusions.indexOf(req) !== -1) {
+            //get it from the dependency object
+            var dep = depObj[req];
+            if(!dep) {
+              throw new Error(`must provide instance of ${req}`)
+            }
+            deps.push(dep);
+          } else {
+            deps.push(this.create(req));
+          }
+        }
+        return new entry.ctor(...deps);
+      }
     }
   };
 
