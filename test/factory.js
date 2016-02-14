@@ -49,7 +49,7 @@ describe('factory', function() {
       this.bar = 7;
     });
     var factory = injector.factory('foobar', 'bar');
-    var instance = factory({ bar : injector.create('bar') });
+    var instance = factory(injector.create('bar'));
     assert.equal(instance.bar.bar, 7);
   });
 
@@ -65,7 +65,7 @@ describe('factory', function() {
       this.bang = 9;
     });
     var factory = injector.factory('foobar', 'bar');
-    var instance = factory({ bar : injector.create('bar') });
+    var instance = factory(injector.create('bar'));
     assert.equal(instance.bar.bar, 8);
     assert.equal(instance.bang.bang, 9);
   });

@@ -81,3 +81,30 @@ injector.bind({ singleton : true }, function Bang() {
 });
 var bang = injector.create('Bang');
 ```
+
+Factories! You can also create factories.
+```js
+var foo = 3;
+injector.bind(function bar() {
+  this.foo = foo++;
+});
+var Bar = injector.factory('bar');
+var bar1 = Bar();
+var bar2 = Bar();
+```
+
+You can also exclude dependencies for your factory.
+```js
+injector.bind(function bang() {
+  this.bang = 'testing';
+});
+injector.bind(function bar(bang, foo) {
+  this.bang = bang;
+  this.foo = foo;
+});
+
+var Bar = injector.factory('bar', 'foo');
+var bar = Bar(5);
+assert(bar.foo, 5);
+assert(bar.bang, 'testing');
+```

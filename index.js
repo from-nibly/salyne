@@ -50,6 +50,7 @@ exports = module.exports = function Salyne(options) {
   };
 
   this.factory = function() {
+    var self = this;
     exclusions = Object.keys(arguments)
       .map(x => arguments[x]);
     var name = exclusions.splice(0, 1);
@@ -59,19 +60,22 @@ exports = module.exports = function Salyne(options) {
     } else if (entry.options.singleton === true) {
       throw new Error("can't create factory for a singleton");
     } else {
-      return (depObj) => {
+      return function() {
+        var depObj = Object.keys(arguments)
+          .map(x => arguments[x]);
         var deps = [];
         for (var req of entry.requires) {
           //if you have excluded the requirement from the factory
-          if(exclusions.indexOf(req) !== -1) {
+          var index = exclusions.indexOf(req);
+          if(index !== -1) {
             //get it from the dependency object
-            var dep = depObj[req];
+            var dep = depObj[index];
             if(!dep) {
               throw new Error(`must provide instance of ${req}`)
             }
             deps.push(dep);
           } else {
-            deps.push(this.create(req));
+            deps.push(self.create(req));
           }
         }
         return new entry.ctor(...deps);
