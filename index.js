@@ -1,8 +1,13 @@
 // Copyright (c) 2016 Jordan S. Davidson
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var fs = require('fs'),
-  path = require('path');
+  path = require('path'),
+  amd = require('./amd.js'),
+  util = require('./util.js');
+
 exports = module.exports = function Salyne(options) {
   var registry = {};
   var parent;
@@ -14,6 +19,9 @@ exports = module.exports = function Salyne(options) {
     while (parent.parent) {
       parent = parent.parent;
     }
+  }
+  if(options.amd === true) {
+    amd(registry, parent);
   }
 
   this.create = function(name) {
@@ -51,10 +59,11 @@ exports = module.exports = function Salyne(options) {
 
   this.factory = function() {
     var self = this;
-    exclusions = Object.keys(arguments)
+    var exclusions = Object.keys(arguments)
       .map(x => arguments[x]);
     var name = exclusions.splice(0, 1);
     var entry = registry[name];
+
     if(!entry) {
       throw new Error(`could not find dependency ${name} for factory creation`);
     } else if (entry.options.singleton === true) {
@@ -84,21 +93,11 @@ exports = module.exports = function Salyne(options) {
   };
 
   this.bind = function() {
-    var func;
-    var name;
-    var options;
     //setup incoming arguments
-    args = Object.keys(arguments)
-      .map(x => arguments[x]);
-    for (var arg of args) {
-      if (typeof arg === 'function') {
-        func = arg;
-      } else if (typeof arg === 'string') {
-        name = arg;
-      } else if (typeof arg === 'object') {
-        options = arg;
-      }
-    }
+    var func = util.getFuncArg(arguments);
+    var name = util.getStringArg(arguments);
+    var options = util.getObjectArg(arguments);
+
     //initialize blank arguments
     if (!func) {
       throw new Error('must provide a constructor function');
@@ -122,9 +121,7 @@ exports = module.exports = function Salyne(options) {
       entry.requires = func['@requires'] || func['@require'];
     } else {
       entry.requires = [];
-      var argString = func.toString()
-        .match(/function\s*[^\(]*\(\s*([^\)]*)\)/m)[1];
-      var argStrings = argString.split(',');
+      var argStrings = util.getArgs(func);
       for (arg of argStrings) {
         if (arg.match(/^\s*$/)) {
           continue;
@@ -139,25 +136,18 @@ exports = module.exports = function Salyne(options) {
   };
 
   this.load = function() {
-    var name;
-    var fileName;
-    var options;
-    args = Object.keys(arguments)
-      .map(x => arguments[x]);
-    for (var arg of args) {
-      if (typeof arg === 'string') {
-        if (arg.endsWith('.js') || arg.endsWith('.json') || arg.indexOf('/') !== -1 || arg.indexOf('\\') !== -1) {
-          fileName = path.join(path.dirname(parent.filename), arg);
-        } else {
-          name = arg;
-        }
-      } else if (typeof arg === 'object') {
-        options = arg;
-      }
+    var name = util.getArg(arguments, arg => typeof arg === 'string' && !util.isFile(arg) && !util.isFile(arg));
+
+    var fileName = util.getArg(arguments, arg => util.isFile(arg) || util.isFolder(arg));
+    if(fileName) {
+      fileName = path.join(path.dirname(parent.filename), fileName)
     }
+
+    var options = util.getObjectArg(arguments);
+
     //initialize fileNames
     var fileNames = [];
-    if (!fileName.endsWith('.js') && !fileName.endsWith('.json')) {
+    if (!util.isFile(fileName)) {
       for (var file of fs.readdirSync(fileName)) {
         fileNames.push(path.join(fileName, file));
       }
@@ -166,17 +156,45 @@ exports = module.exports = function Salyne(options) {
     }
     //setup name
     for (var file of fileNames) {
-      if (!file.endsWith('.js') && !file.endsWith('.json')) {
+      if (!util.isFile(file)) {
         continue;
       }
       var ctor = parent.require(file);
-      var nameReg = /\/?([\w\.]*)(.js|.json)/gmi
       if (fileNames.length === 1) {
-        name = name || ctor.name || nameReg.exec(file)[1];
+        name = name || ctor.name || util.fileToName(file);
       } else {
-        name = ctor.name || nameReg.exec(file)[1];
+        name = ctor.name || util.fileToName(file);
       }
       this.bind(name, ctor, options);
+    }
+  };
+
+  this.configure = function() {
+    var names = util.getStringVarArgs(arguments);
+    var options = util.getObjectArg(arguments);
+    if(!options) {
+      throw new Error('must provide options to configure');
+    }
+    //lookup existing dependency
+    for(var name of names) {
+      var entry = registry[name];
+      if(!entry) {
+        throw new Error(`no bound dependency ${name}`);
+      } else {
+        entry.options = options;
+      }
+    }
+  };
+
+  this.resetSingleton = function() {
+    var names = util.getStringVarArgs(arguments);
+    for(var name of names) {
+      var entry = registry[name];
+      if(!entry) {
+        throw new Error(`no bound dependency ${name}`);
+      } else {
+        entry.instance = null;
+      }
     }
   };
 };
