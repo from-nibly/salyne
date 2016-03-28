@@ -10,14 +10,14 @@ describe('load', function() {
       parent: module
     });
     //clear require cache
-    var examples = fs.readdirSync(path.join(__dirname, 'examples'));
-    for(var x of examples) {
-      delete require.cache[require.resolve('./' + path.join('./examples/', x))];
+    var loadExamples = fs.readdirSync(path.join(__dirname, 'loadExamples'));
+    for(var x of loadExamples) {
+      delete require.cache[require.resolve('./' + path.join('./loadExamples/', x))];
     }
   });
 
   it('should load a single class file', function() {
-    injector.load('./examples/class1.js');
+    injector.load('./loadExamples/class1.js');
     var expected = {
       test: 5
     };
@@ -25,7 +25,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a single class file with a different name', function() {
-    injector.load('./examples/class2.js');
+    injector.load('./loadExamples/class2.js');
     var expected = {
       test: 6
     };
@@ -33,7 +33,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a single class file and name it', function() {
-    injector.load('./examples/class2.js', 'ClassZ');
+    injector.load('./loadExamples/class2.js', 'ClassZ');
     var expected = {
       test: 6
     };
@@ -41,19 +41,19 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a single class file as singleton property', function() {
-    injector.load('./examples/class3.js');
+    injector.load('./loadExamples/class3.js');
     var expected = injector.create('Class3');
     var actual = injector.create('Class3');
     assert.deepEqual(expected, actual);
   });
   it('should load a single class file as singleton annotation', function() {
-    injector.load('./examples/class4.js');
+    injector.load('./loadExamples/class4.js');
     var expected = injector.create('Class4');
     var actual = injector.create('Class4');
     assert.deepEqual(expected, actual);
   });
   it('should load a single class file as singleton option', function() {
-    injector.load('./examples/class5.js', {
+    injector.load('./loadExamples/class5.js', {
       singleton: true
     });
     var expected = injector.create('Class5');
@@ -61,7 +61,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a folder of class files with names', function() {
-    injector.load('./examples/');
+    injector.load('./loadExamples/');
     var expected = {
       test: 6
     };
@@ -74,7 +74,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a folder of class files with names and dependencies as signature', function() {
-    injector.load('./examples/');
+    injector.load('./loadExamples/');
     var expected = {
       test: 9,
       a: {
@@ -88,7 +88,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a folder of class files with names and dependencies as property', function() {
-    injector.load('./examples/');
+    injector.load('./loadExamples/');
     var expected = {
       test: 10,
       a: {
@@ -102,7 +102,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a folder of class files with names and dependencies as an annotation', function() {
-    injector.load('./examples/');
+    injector.load('./loadExamples/');
     var expected = {
       test: 11,
       a: {
@@ -116,7 +116,7 @@ describe('load', function() {
     assert.deepEqual(expected, actual);
   });
   it('should load a folder of class files with names and dependencies that have dependencies', function() {
-    injector.load('./examples/');
+    injector.load('./loadExamples/');
     var expected = {
       test: 1,
       e: {
@@ -137,7 +137,7 @@ describe('load', function() {
     assert.instanceOf(fs.readdirSync, Function)
   });
   it('should throw on cirucular dependency', function() {
-    injector.load('./examples/');
+    injector.load('./loadExamples/');
     assert.throw(function() {
       var actual = injector.create('Class10');
     }, 'circular dependency detected: Class10,Class10');
