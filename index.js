@@ -21,7 +21,7 @@ exports = module.exports = function Salyne(options) {
     }
   }
   if(options.amd === true) {
-    amd(registry, parent);
+    amd(this);
   }
 
   this.create = function(name) {
@@ -136,14 +136,14 @@ exports = module.exports = function Salyne(options) {
   };
 
   this.load = function() {
-    var name = util.getArg(arguments, arg => typeof arg === 'string' && !util.isFile(arg) && !util.isFile(arg));
+    var name = util.getArg(arguments, arg => typeof arg === 'string' && !util.isFile(arg) && !util.isFolder(arg));
 
     var fileName = util.getArg(arguments, arg => util.isFile(arg) || util.isFolder(arg));
     if(fileName) {
       fileName = path.join(path.dirname(parent.filename), fileName)
     }
 
-    var options = util.getObjectArg(arguments);
+    var options = util.getObjectArg(arguments) || {};
 
     //initialize fileNames
     var fileNames = [];
@@ -154,18 +154,27 @@ exports = module.exports = function Salyne(options) {
     } else {
       fileNames.push(fileName);
     }
+
+    if(fileNames.length > 1 && name) {
+      throw new Error('cannot set name when loading more than one file');
+    }
     //setup name
     for (var file of fileNames) {
       if (!util.isFile(file)) {
         continue;
       }
+      this.fileName = util.fileToName(file);
+      this.overrideName = name;
       var ctor = parent.require(file);
-      if (fileNames.length === 1) {
-        name = name || ctor.name || util.fileToName(file);
+      this.fileName = null;
+      if(typeof ctor === 'function') {
+        var depName = name || ctor.name || util.fileToName(file);
+        this.bind(depName, ctor, options);
+      } else if(this.defineCalled === true) {
+        this.defineCalled === false;
       } else {
-        name = ctor.name || util.fileToName(file);
+        throw new Error(`file ${file} did not return a constructor and was not "defined"`);
       }
-      this.bind(name, ctor, options);
     }
   };
 

@@ -1,3 +1,3 @@
-exports = module.exports = function ClassX() {
+exports = module.exports = function Class2() {
   this.test = 6;
 };

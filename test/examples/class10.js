@@ -1,5 +1,5 @@
-exports = module.exports = function ClassG(g) {
+exports = module.exports = function Class10(Class10) {
   this.test = 1;
   this.g = g;
 };
-exports.requires = ['ClassG'];
+exports.requires = ['Class10'];
