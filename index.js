@@ -57,6 +57,28 @@ exports = module.exports = function Salyne(options) {
     }
   };
 
+  function extractArgs(func) {
+    var rtn = func.requires
+      || func.require
+      || func['@requires']
+      || func['@require'];
+    if(rtn) {
+      return rtn;
+    }
+    rtn = [];
+    var argStrings = util.getArgs(func);
+    for (arg of argStrings) {
+      //if chunck is only whitespace ignore
+      if (arg.match(/^\s*$/)) {
+        continue;
+      }
+      //remove white space
+      arg = arg.replace(/\s/, '');
+      rtn.push(arg);
+    }
+    return rtn;
+  }
+
   this.factory = function() {
     var self = this;
     var exclusions = Object.keys(arguments)
@@ -92,17 +114,29 @@ exports = module.exports = function Salyne(options) {
     }
   };
 
+  this.inject = function() {
+    var func = util.getFuncArg(arguments);
+    var options = util.getObjectArg(arguments) || {};
+
+    var requirements = options.requires || options.require ||  extractArgs(func);
+
+    var deps = [];
+    for(var req of requirements) {
+      deps.push(this.create(req));
+    }
+    func(...deps);
+  };
+
   this.bind = function() {
     //setup incoming arguments
     var func = util.getFuncArg(arguments);
     var name = util.getStringArg(arguments);
-    var options = util.getObjectArg(arguments);
+    var options = util.getObjectArg(arguments) || {};
 
     //initialize blank arguments
     if (!func) {
       throw new Error('must provide a constructor function');
     }
-    options = options || {};
     options.singleton = options.singleton || func.singleton || func['@singleton'] || false;
     name = name || func.name || options.name;
     if (!name) {
@@ -115,21 +149,7 @@ exports = module.exports = function Salyne(options) {
     };
 
     //get dependencies
-    if (func.requires || func.require) {
-      entry.requires = func.requires || func.require;
-    } else if (func['@requires'] || func['@require']) {
-      entry.requires = func['@requires'] || func['@require'];
-    } else {
-      entry.requires = [];
-      var argStrings = util.getArgs(func);
-      for (arg of argStrings) {
-        if (arg.match(/^\s*$/)) {
-          continue;
-        }
-        arg = arg.replace(/\s/, '');
-        entry.requires.push(arg);
-      }
-    }
+    entry.requires = extractArgs(func);
 
     //put values in registry
     registry[name] = entry;
