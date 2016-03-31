@@ -102,7 +102,7 @@ exports = module.exports = function Salyne(options) {
             //get it from the dependency object
             var dep = depObj[index];
             if(!dep) {
-              throw new Error(`must provide instance of ${req}`)
+              throw new Error(`must provide instance of ${req}`);
             }
             deps.push(dep);
           } else {
@@ -118,7 +118,7 @@ exports = module.exports = function Salyne(options) {
     var func = util.getFuncArg(arguments);
     var options = util.getObjectArg(arguments) || {};
 
-    var requirements = options.requires || options.require ||  extractArgs(func);
+    var requirements = util.getArrayArg(arguments) || options.requires || options.require ||  extractArgs(func);
 
     var deps = [];
     for(var req of requirements) {
@@ -226,4 +226,13 @@ exports = module.exports = function Salyne(options) {
       }
     }
   };
+};
+
+//convenience static method for node_modules and nodejs packages only
+var instance = null;
+exports.inject = function() {
+  if(!instance) {
+    instance = new exports();
+  }
+  return instance.inject(...arguments);
 };
