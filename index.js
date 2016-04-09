@@ -192,8 +192,13 @@ exports = module.exports = function Salyne(options) {
         this.bind(depName, ctor, options);
       } else if(this.defineCalled === true) {
         this.defineCalled === false;
+      } else if(file.endsWith(".json")) {
+        var depName = name || util.fileToName(file);
+        this.bind(depName, options, function() {
+          return Object.assign({}, ctor);
+        });
       } else {
-        throw new Error(`file ${file} did not return a constructor and was not "defined"`);
+        throw new Error(`file ${file} did not return a constructor, was not "defined" and did not have a .json extension`);
       }
     }
   };
