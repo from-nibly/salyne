@@ -18,28 +18,6 @@ describe('inject', function() {
     });
   });
 
-  it('should inject using require option', function() {
-    var ctor = function literal() {
-      this.test = 5;
-    };
-    injector.bind(ctor);
-    injector.inject(function(actual) {
-      var expected = new ctor();
-      assert.deepEqual(expected, actual);
-    }, { require : ['literal'] });
-  });
-
-  it('should inject using requires option', function() {
-    var ctor = function literal() {
-      this.test = 5;
-    };
-    injector.bind(ctor);
-    injector.inject(function(actual) {
-      var expected = new ctor();
-      assert.deepEqual(expected, actual);
-    }, { requires : ['literal'] });
-  });
-
   it('should inject dependency with dependency', function() {
     var ctor = function literal(foobar) {
       this.test = 5;
@@ -51,10 +29,10 @@ describe('inject', function() {
     injector.bind(ctor);
     injector.bind(foobar);
 
-    injector.inject(function(actual) {
+    injector.inject(['literal'], function(actual) {
       var expected = new ctor(new foobar());
       assert.deepEqual(expected, actual);
-    }, { requires : ['literal'] });
+    });
   });
 
   it('should inject multiple dependencies', function() {
@@ -66,12 +44,12 @@ describe('inject', function() {
     };
     injector.bind(ctor);
     injector.bind(foobar);
-    injector.inject(function(actual, actFoo) {
+    injector.inject(['literal', 'foobar'], function(actual, actFoo) {
       var expected = new ctor();
       var expFoobar = new foobar();
       assert.deepEqual(expected, actual);
       assert.deepEqual(expFoobar, actFoo);
-    }, { requires : ['literal', 'foobar'] });
+    });
   });
 
 });

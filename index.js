@@ -5,13 +5,14 @@
 
 var fs = require('fs'),
   path = require('path'),
-  amd = require('./amd.js'),
   util = require('./util.js');
 
 exports = module.exports = function Salyne(options) {
   var registry = {};
   var parent;
+  var self = this;
   options = options || {};
+
   if (options.parent) {
     parent = options.parent;
   } else {
@@ -19,9 +20,6 @@ exports = module.exports = function Salyne(options) {
     while (parent.parent) {
       parent = parent.parent;
     }
-  }
-  if(options.amd === true) {
-    amd(this);
   }
 
   this.create = function(name) {
@@ -118,7 +116,7 @@ exports = module.exports = function Salyne(options) {
     var func = util.getFuncArg(arguments);
     var options = util.getObjectArg(arguments) || {};
 
-    var requirements = util.getArrayArg(arguments) || options.requires || options.require ||  extractArgs(func);
+    var requirements = util.getArrayArg(arguments) || extractArgs(func);
 
     var deps = [];
     for(var req of requirements) {
@@ -185,7 +183,13 @@ exports = module.exports = function Salyne(options) {
       }
       this.fileName = util.fileToName(file);
       this.overrideName = name;
+      //prevent breaking other globals
+      var oldDefine = GLOBAL.define;
+      GLOBAL.define = define;
+      //require file
       var ctor = parent.require(file);
+      //restore other global
+      GLOBAL.define = oldDefine;
       this.fileName = null;
       if(typeof ctor === 'function') {
         var depName = name || ctor.name || util.fileToName(file);
@@ -201,6 +205,15 @@ exports = module.exports = function Salyne(options) {
         throw new Error(`file ${file} did not return a constructor, was not "defined" and did not have a .json extension`);
       }
     }
+  };
+
+  var define = function() {
+    var func = util.getFuncArg(arguments);
+    var options = util.getObjectArg(arguments) || {};
+    var name = self.overrideName ||  util.getStringArg(arguments) || func.name || self.fileName;
+    func.require = util.getArrayArg(arguments);
+    self.defineCalled = true;
+    self.bind(name, func, options);
   };
 
   this.configure = function() {
