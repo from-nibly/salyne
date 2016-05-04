@@ -58,7 +58,7 @@ exports.getArrayArg = function(args) {
 };
 
 exports.getObjectArg = function(args) {
-  return exports.getArg(args, arg => typeof arg === 'object');
+  return exports.getArg(args, arg => typeof arg === 'object' && !Array.isArray(arg));
 };
 
 exports.getFuncArg = function(args) {
