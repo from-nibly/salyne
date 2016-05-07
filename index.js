@@ -184,12 +184,12 @@ exports = module.exports = function Salyne(options) {
       this.fileName = util.fileToName(file);
       this.overrideName = name;
       //prevent breaking other globals
-      var oldDefine = GLOBAL.define;
-      GLOBAL.define = define;
+      var oldDefine = global.define;
+      global.define = define;
       //require file
       var ctor = parent.require(file);
       //restore other global
-      GLOBAL.define = oldDefine;
+      global.define = oldDefine;
       this.fileName = null;
       if(typeof ctor === 'function') {
         var depName = name || ctor.name || util.fileToName(file);
