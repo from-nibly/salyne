@@ -60,6 +60,11 @@ describe('load', function() {
     var actual = injector.create('Class5');
     assert.deepEqual(expected, actual);
   });
+  it('should load a single class file as singleton option', function() {
+    injector.load('./loadExamples/class11.js');
+    var actual = injector.factory('Class11');
+    assert.equal(actual.options.other, 6);
+  });
   it('should load a folder of class files with names', function() {
     injector.load('./loadExamples/');
     var expected = {

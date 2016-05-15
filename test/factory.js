@@ -15,6 +15,15 @@ describe('factory', function() {
     var instance = factory();
     assert.equal(instance.foo, 5);
   });
+  it('should be able to create a factory with other options', function() {
+    injector.bind(function foobar() {
+      this.foo = 5;
+    }, { other : 6 });
+    var factory = injector.factory('foobar');
+    var instance = factory();
+    assert.equal(factory.options.other, 6);
+    assert.equal(instance.foo, 5);
+  });
 
   it('should be able to create a factory with no requirements multiple times', function() {
     var bar = 5;

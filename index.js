@@ -89,7 +89,7 @@ exports = module.exports = function Salyne(options) {
     } else if (entry.options.singleton === true) {
       throw new Error("can't create factory for a singleton");
     } else {
-      return function() {
+      var factory = function() {
         var depObj = Object.keys(arguments)
           .map(x => arguments[x]);
         var deps = [];
@@ -109,6 +109,8 @@ exports = module.exports = function Salyne(options) {
         }
         return new entry.ctor(...deps);
       }
+      factory.options = entry.options;
+      return factory;
     }
   };
 
@@ -192,6 +194,9 @@ exports = module.exports = function Salyne(options) {
       global.define = oldDefine;
       this.fileName = null;
       if(typeof ctor === 'function') {
+        for(var x in ctor) {
+          options[x] = ctor[x];
+        }
         var depName = name || ctor.name || util.fileToName(file);
         this.bind(depName, ctor, options);
       } else if(this.defineCalled === true) {
