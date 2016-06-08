@@ -55,6 +55,21 @@ exports = module.exports = function Salyne(options) {
     }
   };
 
+  this.run = function(name) {
+    var entry = registry[name];
+    if(!entry) {
+      throw new Error(`unable to find runnable ${name}`);
+    }
+    if(!entry.options.runnable) {
+      throw new Error(`${name} is not runnable set "runnable" to true in it's options`);
+    }
+    var args = [];
+    for(var req of entry.requires) {
+      args.push(this.create(req));
+    }
+    return entry.ctor(...args);
+  };
+
   function extractArgs(func) {
     var rtn = func.requires
       || func.require
