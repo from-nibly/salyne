@@ -151,6 +151,7 @@ exports = module.exports = function Salyne(options) {
     var func = util.getFuncArg(arguments);
     var name = util.getStringArg(arguments);
     var options = util.getObjectArg(arguments) || {};
+    var requires = util.getArrayArg(arguments);
 
     //initialize blank arguments
     if (!func) {
@@ -168,7 +169,7 @@ exports = module.exports = function Salyne(options) {
     };
 
     //get dependencies
-    entry.requires = extractArgs(func);
+    entry.requires = requires ||  extractArgs(func);
 
     //put values in registry
     registry[name] = entry;
