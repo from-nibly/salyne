@@ -35,7 +35,7 @@ injector.load('FooBar', './lib/foobar.js');
 // name will be FooBar
 ```
 
-I also said that this is a dependency injection library. Here are some ways you can define your dependencies inside your class.
+I also said that this is a dependency injection library. Here are some ways you can define your dependencies inside a file.
 
 ```js
 // salyne will take just the argument names just like angular (but they have to be exact)
@@ -50,6 +50,16 @@ exports.requires = [ 'Foo', 'Baur', 'Zip']
 exports['@requires'] = [ 'Foo', 'Baur', 'Zip']
 exports.require = [ 'Foo', 'Baur', 'Zip']
 exports['@require'] = [ 'Foo', 'Baur', 'Zip']
+```
+
+you can also use the define function instead of module.exports. This way you can define multiple dependencies per file
+```js
+define('Test1', ['Bar', 'Foo'], function(bar, foo) {
+
+});
+define(function Test2(Bar, Foo) {
+
+});
 ```
 
 You can also create a singleton really easily!

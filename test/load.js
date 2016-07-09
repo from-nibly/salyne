@@ -152,4 +152,10 @@ describe('load', function() {
       var actual = injector.create('Class10');
     }, 'could not find dependency Class10');
   });
+  it('should throw on pathable missing dependency', function() {
+    injector.load('./loadExamples/');
+    assert.throw(function() {
+      injector.create('class12')
+    }, 'could not find dependency Foobar path was: class12->Foobar');
+  });
 });

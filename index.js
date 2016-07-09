@@ -23,7 +23,7 @@ exports = module.exports = function Salyne(options) {
   }
 
   this.create = function(name) {
-    return create(name, []);
+    return create(name, [name]);
   };
 
   var create = (name, dir) => {
@@ -32,7 +32,11 @@ exports = module.exports = function Salyne(options) {
       try {
         return parent.require(name);
       } catch (e) {
-        throw new Error(`could not find dependency ${name}`);
+        var msg = `could not find dependency ${name}`
+        if(dir && dir.length > 1) {
+          msg += ` path was: ${dir.join('->')}`
+        }
+        throw new Error(msg);
       }
     } else if (entry.options.singleton === true && entry.instance) {
       return entry.instance;
