@@ -118,3 +118,14 @@ var bar = Bar(5);
 assert(bar.foo, 5);
 assert(bar.bang, 'testing');
 ```
+
+It will parse the require string and traverse to sub properties
+```js
+define(['child_process->execSync'], function(exec) {
+  exec('ls');
+});
+//or
+define(['config->http', 'expressApp'], function(http, app) {
+  app.listen(http.port);
+});
+```

@@ -27,10 +27,13 @@ exports = module.exports = function Salyne(options) {
   };
 
   var create = (name, dir) => {
+    var path = name.split('->').slice(1);
+    name = name.split('->')[0];
     var entry = registry[name];
+    var rtn;
     if (!entry) {
       try {
-        return parent.require(name);
+        rtn = parent.require(name);
       } catch (e) {
         var msg = `could not find dependency ${name}`
         if(dir && dir.length > 1) {
@@ -39,7 +42,7 @@ exports = module.exports = function Salyne(options) {
         throw new Error(msg);
       }
     } else if (entry.options.singleton === true && entry.instance) {
-      return entry.instance;
+      rtn = entry.instance;
     } else {
       var instance;
       var deps = [];
@@ -55,8 +58,12 @@ exports = module.exports = function Salyne(options) {
         deps.push(create(req, newDir));
       }
       entry.instance = new entry.ctor(...deps);
-      return entry.instance;
+      rtn = entry.instance;
     }
+    for(var dir of path) {
+      rtn = rtn[dir];
+    }
+    return rtn;
   };
 
   this.run = function(name) {
@@ -149,7 +156,7 @@ exports = module.exports = function Salyne(options) {
   this.bind = function() {
     //setup incoming arguments
     var func = util.getFuncArg(arguments);
-    var name = util.getStringArg(arguments);
+    var name = util.getStringArg(arguments) || func.name;
     var options = util.getObjectArg(arguments) || {};
     var requires = util.getArrayArg(arguments);
 
