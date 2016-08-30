@@ -66,6 +66,16 @@ describe('bind', function() {
     var expected = injector.create('literal');
     assert.deepEqual(expected, actual);
   });
+  it('should be able to bind a class', function() {
+    injector.bind(function bar() {
+      this.bang = 4
+    });
+    injector.bind(class foo {
+      constructor(bar) {
+        this.bar = bar;
+      }
+    });
+  });
   it('should throw without a function', function() {
     assert.throw(function() {
       injector.bind('foobar');

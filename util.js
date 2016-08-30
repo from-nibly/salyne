@@ -2,8 +2,8 @@ exports = module.exports = {};
 
 exports.getArgs = function(func) {
   var result = func.toString()
-    .match(/function\s*[^\(]*\(\s*([^\)]*)\)/m);
-  return result[1].split(',');
+    .match(/(function|constructor)\s*[^\(]*\(\s*([^\)]*)\)/m);
+  return result[2].split(',');
 };
 
 exports.fileToName = function(filename) {
