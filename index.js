@@ -156,7 +156,7 @@ exports = module.exports = function Salyne(options) {
   this.bind = function() {
     //setup incoming arguments
     var func = util.getFuncArg(arguments);
-    var name = util.getStringArg(arguments) || func.name;
+    var name = util.getStringArg(arguments);
     var options = util.getObjectArg(arguments) || {};
     var requires = util.getArrayArg(arguments);
 
@@ -165,7 +165,7 @@ exports = module.exports = function Salyne(options) {
       throw new Error('must provide a constructor function');
     }
     options.singleton = options.singleton || func.singleton || func['@singleton'] || false;
-    name = name || func.name || options.name;
+    name = name || options.name || func.name;
     if (!name) {
       throw new Error('must either provide a name argument, option, or named function');
     }
